@@ -2,13 +2,12 @@
 import ProjectEditorWrap from "@/components/ProjectEditor/ProjectEditor";
 import MainLayout from "@/layouts/MainLayout.astro";
 
+export const prerender = false;
 const { id = "" } = Astro.params;
 
 const url = new URL(Astro.request.url);
 const profileId = url.searchParams.get("profileId") || "";
 const index = Number(url.searchParams.get("index") || "0");
-
-export const prerender = false;
 ---
 
 <MainLayout title="Community">
