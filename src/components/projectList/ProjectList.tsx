@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSuiClient, useCurrentAccount } from "@mysten/dapp-kit";
 
 interface ProjectItem {
+  objectId: string;
   index: number;
   name: string;
   link_demo: string;
@@ -35,9 +36,10 @@ export const ProjectList = ({ profileId }: { profileId: string }) => {
           });
 
           const object = obj.data?.content?.fields.value;
-
+          console.log("❇️ Project object data:", object?.fields);
           return {
-            index: object?.index?.fields?.index ?? 0,
+            objectId: item.objectId,
+            index: obj.data?.content?.fields?.name?.fields?.index,
             name: object?.fields?.name,
             link_demo: object?.fields?.link_demo,
             description: object?.fields?.description,
@@ -58,11 +60,14 @@ export const ProjectList = ({ profileId }: { profileId: string }) => {
   if (loading) return <div>Đang tải danh sách dự án...</div>;
   if (projects.length === 0)
     return <div className="text-gray-400">Chưa có dự án nào.</div>;
-
+  console.log("Projects to display:", projects);
   return (
     <div className="mt-4 grid grid-cols-1 gap-4">
       {projects.map((p, i) => (
         <div
+          onClick={() =>
+            (window.location.href = `/project/${p.objectId}?profileId=${profileId}&&index=${p.index}`)
+          }
           key={i}
           className="rounded-lg border border-gray-300 bg-white/10 p-4 shadow"
         >
