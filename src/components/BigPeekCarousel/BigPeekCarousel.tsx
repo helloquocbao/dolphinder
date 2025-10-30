@@ -1,3 +1,4 @@
+"use client";
 import "swiper/css";
 import { Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -5,41 +6,50 @@ import ProfileCard from "../profileCard/ProfileCard";
 
 export const BigPeekCarousel = ({ profiles }: any) => {
   return (
-    <Swiper
-      slidesPerView={3} // ✅ Hiển thị 3 item một lần
-      centeredSlides={true} // ✅ Căn giữa slide hiện tại
-      spaceBetween={40} // ✅ Khoảng cách giữa các card
-      loop={true}
-      autoplay={{
-        delay: 3000,
-        disableOnInteraction: false,
-      }}
-      speed={1000}
-      modules={[Autoplay]}
-      className="w-full py-10" // ✅ Thêm khoảng padding để thoáng hơn
-      breakpoints={{
-        320: { slidesPerView: 1 }, // Mobile: 1 card
-        768: { slidesPerView: 2 }, // Tablet: 2 card
-        1024: { slidesPerView: 3 }, // Desktop: 3 card
-      }}
-    >
-      {profiles.map((item: any) => (
-        <SwiperSlide
-          key={item.profileId}
-          className="flex justify-center transition-transform duration-300 hover:scale-105"
-        >
-          <ProfileCard
-            profile={{
-              projectCount: item.projectCount,
-              certificateCount: item.certificateCount,
-              profileId: item.profileId,
-              owner: item.owner,
-              name: item.name,
-              createdAt: item.createdAt,
-            }}
-          />
-        </SwiperSlide>
-      ))}
-    </Swiper>
+    <div className="relative w-full">
+      {/* 🌫 Gradient fade hai bên */}
+      <div className="pointer-events-none absolute top-0 left-0 z-20 h-full w-24 bg-gradient-to-r from-black/30 via-transparent to-transparent"></div>
+      <div className="pointer-events-none absolute top-0 right-0 z-20 h-full w-24 bg-gradient-to-l from-black/30 via-transparent to-transparent"></div>
+
+      <Swiper
+        slidesPerView={5}
+        centeredSlides
+        spaceBetween={30}
+        loop
+        autoplay={{
+          delay: 3000,
+          disableOnInteraction: false,
+        }}
+        speed={1000}
+        modules={[Autoplay]}
+        className="relative w-full py-10"
+        breakpoints={{
+          320: { slidesPerView: 1 },
+          640: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+          1440: { slidesPerView: 5 },
+        }}
+      >
+        {profiles.map((item: any, index: number) => (
+          <SwiperSlide
+            key={item.profileId}
+            className="flex justify-center transition-all duration-300"
+          >
+            <div className="relative flex h-[320px] w-[280px] items-center justify-center transition-transform duration-300 ease-out hover:scale-105">
+              <ProfileCard
+                profile={{
+                  projectCount: item.projectCount,
+                  certificateCount: item.certificateCount,
+                  profileId: item.profileId,
+                  owner: item.owner,
+                  name: item.name,
+                  createdAt: item.createdAt,
+                }}
+              />
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 };
