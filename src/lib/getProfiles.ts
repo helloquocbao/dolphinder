@@ -89,10 +89,14 @@ export async function getMyProfile(
 }
 
 /**
- * � Lấy tất cả profiles với đầy đủ thông tin (chậm hơn vì phải query từng object)
+ * 🔹 Lấy danh sách tất cả profiles kèm chi tiết
+ * @param packageId - ID của package chứa module profiles
+ * @param network - Mạng (testnet, mainnet,...)
+ * @param limit - Số lượng item cần lấy (nếu không truyền => lấy tất cả)
  */
 export async function getAllProfilesWithDetails(
   packageId: string,
+  limit?: number,
   network: Network = "testnet"
 ): Promise<Profile[]> {
   const client = new SuiClient({ url: getFullnodeUrl(network) });
@@ -102,7 +106,7 @@ export async function getAllProfilesWithDetails(
     query: {
       MoveEventType: `${packageId}::profiles::ProfileCreated`,
     },
-    limit: 1000,
+    limit: limit ?? 100,
     order: "descending",
   });
 

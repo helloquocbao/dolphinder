@@ -23,7 +23,7 @@ export const DeveloperBubble: FC = () => {
   const getListProfiles = async () => {
     try {
       setLoading(true);
-      const data = await getAllProfilesWithDetails(PACKAGE_ID);
+      const data = await getAllProfilesWithDetails(PACKAGE_ID, 15);
       setProfiles(data);
     } catch (error) {
       console.error("❌ Load profiles error:", error);
