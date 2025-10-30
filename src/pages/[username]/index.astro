@@ -1,15 +1,7 @@
 ---
-import { loadDevelopers } from "../../data/loadDevs";
-import { ArrowLeft, Github, Linkedin, Globe, Copy } from "@lucide/astro";
-import MainLayout from "../../components/MainLayout.astro";
+import MainLayout from "@/layouts/MainLayout.astro";
 
-export async function getStaticPaths() {
-  const developers = await loadDevelopers();
-  return developers.map(dev => ({
-    params: { username: dev.username },
-    props: { dev },
-  }));
-}
+import { Globe, Copy } from "@lucide/astro";
 
 const { dev } = Astro.props;
 ---
@@ -18,80 +10,90 @@ const { dev } = Astro.props;
   <div class="min-h-screen pt-16">
     <div class="container mx-auto px-4 py-8">
       <!-- Profile Card -->
-      <div class="max-w-2xl mx-auto">
-        <div class="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-8 text-center">
+      <div class="mx-auto max-w-2xl">
+        <div
+          class="rounded-xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm"
+        >
           <!-- Avatar -->
-          <div class="flex justify-center mb-6">
+          <div class="mb-6 flex justify-center">
             <img
               src={dev.avatar || `https://github.com/${dev.username}.png`}
               alt={dev.name}
-              class="w-32 h-32 rounded-full border-4 border-white/20"
+              class="h-32 w-32 rounded-full border-4 border-white/20"
               loading="lazy"
             />
           </div>
 
           <!-- Info -->
-          <h1 class="text-3xl font-bold mb-2">{dev.name}</h1>
-          <p class="text-xl text-white/60 mb-6">@{dev.username}</p>
-          
-          {dev.bio && (
-            <p class="text-white/70 mb-8 leading-relaxed">
-              {dev.bio}
-            </p>
-          )}
+          <h1 class="mb-2 text-3xl font-bold">{dev.name}</h1>
+          <p class="mb-6 text-xl text-white/60">@{dev.username}</p>
+
+          {
+            dev.bio && (
+              <p class="mb-8 leading-relaxed text-white/70">{dev.bio}</p>
+            )
+          }
 
           <!-- Social Links -->
-          <div class="flex justify-center space-x-4 mb-8">
-            <a 
-              href={dev.github} 
-              target="_blank" 
-              class="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
+          <div class="mb-8 flex justify-center space-x-4">
+            <a
+              href={dev.github}
+              target="_blank"
+              class="flex items-center space-x-2 rounded-lg bg-white/10 px-4 py-2 transition-all duration-300 hover:scale-105 hover:bg-white/20"
             >
-              <Github class="w-5 h-5" />
+              <Github class="h-5 w-5" />
               <span>GitHub</span>
             </a>
-            
-            {dev.linkedin && (
-              <a 
-                href={dev.linkedin} 
-                target="_blank" 
-                class="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
-              >
-                <Linkedin class="w-5 h-5" />
-                <span>LinkedIn</span>
-              </a>
-            )}
-            
-            {dev.website && (
-              <a 
-                href={dev.website} 
-                target="_blank" 
-                class="flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105"
-              >
-                <Globe class="w-5 h-5" />
-                <span>Website</span>
-              </a>
-            )}
+
+            {
+              dev.linkedin && (
+                <a
+                  href={dev.linkedin}
+                  target="_blank"
+                  class="flex items-center space-x-2 rounded-lg bg-white/10 px-4 py-2 transition-all duration-300 hover:scale-105 hover:bg-white/20"
+                >
+                  <Linkedin class="h-5 w-5" />
+                  <span>LinkedIn</span>
+                </a>
+              )
+            }
+
+            {
+              dev.website && (
+                <a
+                  href={dev.website}
+                  target="_blank"
+                  class="flex items-center space-x-2 rounded-lg bg-white/10 px-4 py-2 transition-all duration-300 hover:scale-105 hover:bg-white/20"
+                >
+                  <Globe class="h-5 w-5" />
+                  <span>Website</span>
+                </a>
+              )
+            }
           </div>
 
           <!-- Wallet Address (if available) -->
-          {dev.slushWallet && (
-            <div class="bg-white/5 rounded-lg p-4 border border-white/10">
-              <h3 class="text-sm font-semibold text-white/80 mb-2">Wallet Address</h3>
-              <div class="flex items-center justify-between bg-black/20 rounded-lg p-3">
-                <code class="font-mono text-sm text-white/70 break-all">
-                  {dev.slushWallet}
-                </code>
-                <button
-                  onclick={`navigator.clipboard.writeText('${dev.slushWallet}')`}
-                  class="ml-3 p-1 hover:bg-white/10 rounded transition-colors"
-                  title="Copy to clipboard"
-                >
-                  <Copy class="h-4 w-4 text-white/60" />
-                </button>
+          {
+            dev.slushWallet && (
+              <div class="rounded-lg border border-white/10 bg-white/5 p-4">
+                <h3 class="mb-2 text-sm font-semibold text-white/80">
+                  Wallet Address
+                </h3>
+                <div class="flex items-center justify-between rounded-lg bg-black/20 p-3">
+                  <code class="font-mono text-sm break-all text-white/70">
+                    {dev.slushWallet}
+                  </code>
+                  <button
+                    onclick={`navigator.clipboard.writeText('${dev.slushWallet}')`}
+                    class="ml-3 rounded p-1 transition-colors hover:bg-white/10"
+                    title="Copy to clipboard"
+                  >
+                    <Copy class="h-4 w-4 text-white/60" />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )
+          }
         </div>
       </div>
     </div>

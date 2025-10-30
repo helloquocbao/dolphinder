@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useState, type FC } from "react";
-import { GlobalSuiProvider } from "./providers/GlobalSuiProvider";
-import ProfileCard from "./profileCard/ProfileCard";
+import { useEffect, useState, type FC } from "react";
+import ProfileCard from "../profileCard/ProfileCard";
 import { getAllProfilesWithDetails } from "@/lib/getProfiles";
+import { GlobalSuiProvider } from "../providers/GlobalSuiProvider";
+import { PACKAGE_ID } from "@/lib/constant";
 
-const DeveloperBubbleWrapper = () => {
+export const DeveloperBubbleWrap: FC = () => {
   return (
     <GlobalSuiProvider>
       <DeveloperBubble />
@@ -12,7 +13,7 @@ const DeveloperBubbleWrapper = () => {
   );
 };
 
-const DeveloperBubble: FC = () => {
+export const DeveloperBubble: FC = () => {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,13 +24,10 @@ const DeveloperBubble: FC = () => {
   const getListProfiles = async () => {
     try {
       setLoading(true);
-      const data = await getAllProfilesWithDetails(
-        "0x9215a17a03e197cf55f482829f4b07c33555f2580e8906dadf566a2077baa5f0"
-      );
-      console.log("Profiles with details:", data);
+      const data = await getAllProfilesWithDetails(PACKAGE_ID);
+
       setProfiles(data);
     } catch (error) {
-      console.error("Error loading profiles:", error);
     } finally {
       setLoading(false);
     }
@@ -49,6 +47,8 @@ const DeveloperBubble: FC = () => {
         <div className="col-span-12 lg:col-span-3" key={profile.profileId}>
           <ProfileCard
             profile={{
+              projectCount: profile.projectCount,
+              certificateCount: profile.certificateCount,
               profileId: profile.profileId,
               owner: profile.owner,
               name: profile.name,
@@ -60,5 +60,3 @@ const DeveloperBubble: FC = () => {
     </div>
   );
 };
-
-export default DeveloperBubbleWrapper;

@@ -35,7 +35,7 @@ export async function getAllProfiles(
 
   return events.data.map((event: SuiEvent) => {
     const data = event.parsedJson as any;
-    console.log("Event data:", data);
+
     return {
       profileId: data.profile_id,
       owner: data.owner,
@@ -113,16 +113,16 @@ export async function getAllProfilesWithDetails(
 
     try {
       const details = await getProfileDetails(packageId, profileId, network);
+
       return {
         profileId,
-        owner: data.owner,
-        name: data.name,
+        owner: details.owner,
+        name: details.name,
         createdAt: parseInt(event.timestampMs || "0"),
         projectCount: parseInt(details?.project_count || "0"),
         certificateCount: parseInt(details?.certificate_count || "0"),
       };
     } catch (error) {
-      console.error(`Error fetching profile ${profileId}:`, error);
       return {
         profileId,
         owner: data.owner,
@@ -141,7 +141,7 @@ export async function getAllProfilesWithDetails(
  * �🔍 Lấy chi tiết một profile
  */
 export async function getProfileDetails(
-  packageId: string,
+  packageId: string, // ✅ thêm lại packageId để đồng bộ call
   profileId: string,
   network: Network = "testnet"
 ): Promise<any> {
@@ -151,7 +151,7 @@ export async function getProfileDetails(
     id: profileId,
     options: {
       showContent: true,
-      showDisplay: true,
+      showOwner: true,
     },
   });
 
@@ -165,10 +165,10 @@ export async function getProfileDetails(
       avatar_url: fields.avatar_url,
       banner_url: fields.banner_url,
       social_links: fields.social_links,
-      project_count: fields.project_count,
-      certificate_count: fields.certificate_count,
+      project_count: Number(fields.project_count) || 0,
+      certificate_count: Number(fields.certificate_count) || 0,
       verified: fields.verified,
-      created_at: fields.created_at,
+      created_at: Number(fields.created_at) || 0,
     };
   }
 

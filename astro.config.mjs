@@ -10,9 +10,5 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  integrations: [
-    react({
-      experimentalReactChildren: true,
-    }),
-  ],
+  integrations: [react()],
 });

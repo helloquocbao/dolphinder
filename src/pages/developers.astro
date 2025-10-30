@@ -1,21 +1,21 @@
 ---
-import MainLayout from "../components/MainLayout.astro";
-import { loadDevelopers } from "../data/loadDevs";
+import MainLayout from "@/layouts/MainLayout.astro";
+
 import { Github, Linkedin, Globe, ExternalLink } from "@lucide/astro";
 
 const developers = await loadDevelopers();
 ---
 
 <MainLayout title="Developers - Dolphinder">
-  <div class="min-h-screen  pt-16">
+  <div class="min-h-screen pt-16">
     <div class="container mx-auto px-4 py-8">
       <!-- Header -->
-      <div class="text-center mb-12">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <div class="mb-12 text-center">
+        <h1 class="mb-4 text-4xl font-bold md:text-5xl">
           Welcome to Dolphinder Nation
         </h1>
-        <p class="text-xl text-white/80 mb-2">
-         The on-chain developer directory & showcases   
+        <p class="mb-2 text-xl text-white/80">
+          The on-chain developer directory & showcases
         </p>
         <p class="text-white/60">
           {developers.length} talented developers and counting...
@@ -23,71 +23,10 @@ const developers = await loadDevelopers();
       </div>
 
       <!-- Developer Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {developers.map((dev) => (
-          <div
-            class="group block bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6     hover:bg-white/10 hover:border-blue-400/30 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20 cursor-pointer"
-            onclick={`window.location.href='/${dev.username}'`}
-          >
-            <!-- Avatar -->
-            <div class="flex justify-center mb-4">
-              <div class="relative">
-                <img
-                  src={dev.avatar || `https://github.com/${dev.username}.png`}
-                  alt={dev.name}
-                  class="w-20 h-20 rounded-full border-3 border-white/20 group-hover:border-blue-400/50 transition-all duration-300"
-                  loading="lazy"
-                />
-              </div>
-            </div>
-
-            <!-- Info -->
-            <div class="text-center">
-              <h3 class="font-semibold text-lg mb-1 group-hover:text-blue-300 transition-colors">
-                {dev.name}
-              </h3>
-              <p class="text-sm text-white/60 mb-3">@{dev.username}</p>
-              
-              {dev.bio && (
-                <p class="text-sm text-white/70 mb-4 line-clamp-2">
-                  {dev.bio}
-                </p>
-              )}
-
-              <!-- Social Links -->
-              <div class="flex justify-center space-x-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                <a 
-                  href={dev.github} 
-                  target="_blank" 
-                  class="text-white/60 hover:text-white transition-colors"
-                  onclick="event.stopPropagation()"
-                >
-                  <Github class="w-4 h-4" />
-                </a>
-                {dev.linkedin && (
-                  <a 
-                    href={dev.linkedin} 
-                    target="_blank" 
-                    class="text-white/60 hover:text-white transition-colors"
-                    onclick="event.stopPropagation()"
-                  >
-                    <Linkedin class="w-4 h-4" />
-                  </a>
-                )}
-                {dev.website && (
-                  <a 
-                    href={dev.website} 
-                    target="_blank" 
-                    class="text-white/60 hover:text-white transition-colors"
-                    onclick="event.stopPropagation()"
-                  >
-                    <Globe class="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+      <div
+        class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        abc
       </div>
 
       <!-- Call to Action -->
@@ -118,4 +57,3 @@ const developers = await loadDevelopers();
     overflow: hidden;
   }
 </style>
-
