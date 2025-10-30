@@ -1,11 +1,12 @@
 ---
 import { DeveloperBubbleWrap } from "@/components/DeveloperBubbles/DeveloperBubbles";
+import Silk from "@/components/react-bits/Silk";
 
 import MainLayout from "@/layouts/MainLayout.astro";
 ---
 
 <MainLayout title="Dolphinder - Developer Directory">
-  <!-- <div class="relative flex min-h-screen items-center justify-center pt-16">
+  <div class="relative flex min-h-screen items-center justify-center pt-16">
     <div class="absolute inset-0 -z-10">
       <Silk
         speed={5}
@@ -15,10 +16,10 @@ import MainLayout from "@/layouts/MainLayout.astro";
         rotation={0}
         client:load
       />
-    </div> -->
+    </div>
 
-  <!-- <div class="absolute inset-0"> -->
-  <DeveloperBubbleWrap client:load />
-  <!-- </div> -->
-  <!-- </div> -->
+    <div class="absolute inset-0">
+      <DeveloperBubbleWrap client:load />
+    </div>
+  </div>
 </MainLayout>
