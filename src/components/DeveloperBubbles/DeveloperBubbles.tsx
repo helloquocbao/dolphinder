@@ -76,7 +76,7 @@ export const DeveloperBubble: FC = () => {
 
           {/* CTA */}
           <button
-            onClick={() => (window.location.href = "/mint-profile")}
+            onClick={() => (window.location.href = "/my-profile")}
             className="mt-4 rounded-lg bg-blue-500 px-6 py-2 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-600"
           >
             🚀 Mint Your Developer Profile

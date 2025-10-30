@@ -44,6 +44,8 @@ export const BigPeekCarousel = ({ profiles }: any) => {
                   owner: item.owner,
                   name: item.name,
                   createdAt: item.createdAt,
+                  avatarUrl: item.avatarUrl,
+                  bannerUrl: item.bannerUrl,
                 }}
               />
             </div>

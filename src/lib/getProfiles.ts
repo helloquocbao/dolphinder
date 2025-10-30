@@ -125,6 +125,8 @@ export async function getAllProfilesWithDetails(
         createdAt: parseInt(event.timestampMs || "0"),
         projectCount: parseInt(details?.project_count || "0"),
         certificateCount: parseInt(details?.certificate_count || "0"),
+        avatarUrl: details?.avatar_url || "",
+        bannerUrl: details?.banner_url || "",
       };
     } catch (error) {
       return {
@@ -134,6 +136,8 @@ export async function getAllProfilesWithDetails(
         createdAt: parseInt(event.timestampMs || "0"),
         projectCount: 0,
         certificateCount: 0,
+        avatarUrl: "",
+        bannerUrl: "",
       };
     }
   });

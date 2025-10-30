@@ -8,6 +8,8 @@ interface ProfileCardProps {
     createdAt: number;
     projectCount?: number;
     certificateCount?: number;
+    avatarUrl?: string;
+    bannerUrl?: string;
   };
 }
 
@@ -17,14 +19,22 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
       {/* 🖼 Banner */}
       <div className="relative flex h-28 w-full justify-center rounded-lg bg-cover">
         <img
-          src="https://horizon-tailwind-react-git-tailwind-components-horizon-ui.vercel.app/static/media/banner.ef572d78f29b0fee0a09.png"
+          src={
+            profile.bannerUrl !== ""
+              ? profile.bannerUrl
+              : "https://horizon-tailwind-react-git-tailwind-components-horizon-ui.vercel.app/static/media/banner.ef572d78f29b0fee0a09.png"
+          }
           alt="banner"
           className="absolute h-28 w-full rounded-lg object-cover"
         />
         <div className="absolute -bottom-10 flex h-[74px] w-[74px] items-center justify-center rounded-full border-[3px] border-white bg-pink-400">
           <img
             className="h-full w-full rounded-full object-cover"
-            src="https://horizon-tailwind-react-git-tailwind-components-horizon-ui.vercel.app/static/media/avatar11.1060b63041fdffa5f8ef.png"
+            src={
+              profile.avatarUrl !== ""
+                ? profile.avatarUrl
+                : "https://pbs.twimg.com/profile_images/1966183924880572416/__KrQPZP_400x400.jpg"
+            }
             alt="avatar"
           />
         </div>
@@ -32,7 +42,14 @@ export default function ProfileCard({ profile }: ProfileCardProps) {
 
       {/* 👤 Info */}
       <div className="mt-14 flex flex-col items-center">
-        <h4 className="text-lg font-semibold text-black">{profile.name}</h4>
+        <h4
+          onClick={() =>
+            (window.location.href = `/profile/${profile.profileId}`)
+          }
+          className="text-lg font-semibold text-black hover:cursor-pointer hover:underline"
+        >
+          {profile.name}
+        </h4>
         <p className="text-sm font-normal text-gray-600">
           {profile.owner.slice(0, 6)}...{profile.owner.slice(-4)}
         </p>
