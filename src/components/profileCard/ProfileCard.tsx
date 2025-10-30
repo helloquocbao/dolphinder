@@ -13,47 +13,52 @@ interface ProfileCardProps {
 
 export default function ProfileCard({ profile }: ProfileCardProps) {
   return (
-    <div className="shadow-3xl shadow-shadow-500 relative mx-auto flex w-[400px] flex-col items-center rounded-[20px] bg-white bg-clip-border p-4">
-      <div className="relative flex h-32 w-full justify-center rounded-xl bg-cover">
+    <div className="relative mx-auto flex w-[340px] flex-col items-center rounded-[16px] bg-white bg-clip-border p-3 shadow-xl">
+      {/* 🖼 Banner */}
+      <div className="relative flex h-28 w-full justify-center rounded-lg bg-cover">
         <img
           src="https://horizon-tailwind-react-git-tailwind-components-horizon-ui.vercel.app/static/media/banner.ef572d78f29b0fee0a09.png"
           alt="banner"
-          className="absolute flex h-32 w-full justify-center rounded-xl bg-cover"
+          className="absolute h-28 w-full rounded-lg object-cover"
         />
-        <div className="dark:!border-navy-700 absolute -bottom-12 flex h-[87px] w-[87px] items-center justify-center rounded-full border-[4px] border-white bg-pink-400">
+        <div className="absolute -bottom-10 flex h-[74px] w-[74px] items-center justify-center rounded-full border-[3px] border-white bg-pink-400">
           <img
-            className="h-full w-full rounded-full"
+            className="h-full w-full rounded-full object-cover"
             src="https://horizon-tailwind-react-git-tailwind-components-horizon-ui.vercel.app/static/media/avatar11.1060b63041fdffa5f8ef.png"
             alt="avatar"
           />
         </div>
       </div>
 
-      <div className="mt-16 flex flex-col items-center">
-        <h4 className="text-xl font-bold text-black">{profile.name}</h4>
-        <p className="text-base font-normal text-gray-600">
+      {/* 👤 Info */}
+      <div className="mt-14 flex flex-col items-center">
+        <h4 className="text-lg font-semibold text-black">{profile.name}</h4>
+        <p className="text-sm font-normal text-gray-600">
           {profile.owner.slice(0, 6)}...{profile.owner.slice(-4)}
         </p>
       </div>
 
-      <div className="mt-6 mb-3 flex gap-14 md:gap-14">
+      {/* 📊 Stats */}
+      <div className="mt-5 mb-2 flex gap-10">
         <div className="flex flex-col items-center justify-center">
-          <p className="text-2xl font-bold text-black">
+          <p className="text-xl font-bold text-black">
             {profile.projectCount || 0}
           </p>
-          <p className="text-sm font-normal text-gray-600">Projects</p>
+          <p className="text-xs font-normal text-gray-600">Projects</p>
         </div>
+
         <div className="flex flex-col items-center justify-center">
-          <p className="text-2xl font-bold text-black">
+          <p className="text-xl font-bold text-black">
             {profile.certificateCount || 0}
           </p>
-          <p className="text-sm font-normal text-gray-600">Certificates</p>
+          <p className="text-xs font-normal text-gray-600">Certificates</p>
         </div>
+
         <div className="flex flex-col items-center justify-center">
-          <p className="text-sm font-normal text-gray-600">
+          <p className="text-xs font-normal text-gray-600">
             {new Date(profile.createdAt).toLocaleDateString()}
           </p>
-          <p className="text-sm font-normal text-gray-600">Joined</p>
+          <p className="text-xs font-normal text-gray-600">Joined</p>
         </div>
       </div>
     </div>

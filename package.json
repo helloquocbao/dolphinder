@@ -14,6 +14,7 @@
     "dev:validate": "node scripts/add-developer.js validate"
   },
   "dependencies": {
+    "swiper": "^10.3.1",
     "@astrojs/react": "^4.3.1",
     "@astrojs/vercel": "^9.0.0",
     "@lucide/astro": "^0.544.0",
