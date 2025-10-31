@@ -183,3 +183,41 @@ export async function getProfileDetails(
 
   return null;
 }
+
+export async function getProfileProjects(client: SuiClient, profileId: string) {
+  try {
+    // 1️⃣ Lấy danh sách dynamic fields trong object profile
+    const fields = await client.getDynamicFields({ parentId: profileId });
+
+    // 2️⃣ Lọc những field có prefix "projects" (tuỳ Move module)
+    const projectFields = fields.data.filter(f =>
+      f.name.type.includes("Project")
+    );
+
+    // 3️⃣ Lấy chi tiết từng project object
+    const projects = await Promise.all(
+      projectFields.map(async field => {
+        const obj = await client.getDynamicFieldObject({
+          parentId: profileId,
+          name: field.name,
+        });
+
+        const fields = (obj.data?.content as any)?.fields;
+
+        return {
+          id: fields.id,
+          name: fields?.value?.fields?.name,
+          description: fields?.value?.fields?.description,
+          link_demo: fields?.value?.fields?.link_demo,
+          created_at: Number(fields?.value?.fields?.created_at) || 0,
+          tags: fields?.value?.fields?.tags || [],
+        };
+      })
+    );
+
+    return projects;
+  } catch (err) {
+    console.error("❌ Error fetching projects:", err);
+    return [];
+  }
+}
