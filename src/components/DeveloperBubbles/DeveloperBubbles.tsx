@@ -34,11 +34,59 @@ export const DeveloperBubble: FC = () => {
 
   if (loading)
     return (
-      <div className="mt-10 text-center text-white/70">Loading profiles...</div>
+      <>
+        <div className="fixed inset-0 -z-10">
+          <Silk
+            speed={5}
+            scale={1}
+            color="#0a0f1c"
+            noiseIntensity={1.2}
+            rotation={0}
+          />
+        </div>
+        <div className="mt-10 text-center text-white/70">
+          Loading profiles...
+        </div>
+      </>
     );
   if (profiles.length === 0)
     return (
-      <div className="mt-10 text-center text-white/70">No profiles found</div>
+      <div className="relative flex min-h-screen flex-col items-center text-center text-white">
+        <div className="fixed inset-0 -z-10">
+          <Silk
+            speed={5}
+            scale={1}
+            color="#0a0f1c"
+            noiseIntensity={1.2}
+            rotation={0}
+          />
+        </div>
+        <div
+          className="mt-24 mb-10 space-y-4 px-4"
+          style={{
+            animation: "fadeInUp 0.8s ease-out both",
+          }}
+        >
+          <h1 className="bg-gradient-to-r from-blue-300 via-white to-blue-500 bg-clip-text text-4xl font-extrabold text-transparent md:text-6xl">
+            Dolphinder Nation 🌍
+          </h1>
+          <p className="mx-auto max-w-2xl text-lg text-white/80">
+            Discover, connect, and celebrate the builders of the Sui ecosystem.
+          </p>
+          <p className="text-sm text-white/50">
+            The on-chain developer directory — powered by{" "}
+            <span className="font-medium text-blue-300">Sui Move</span>.
+          </p>
+
+          {/* CTA */}
+          <button
+            onClick={() => (window.location.href = "/my-profile")}
+            className="mt-4 rounded-lg bg-blue-500 px-6 py-2 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-600"
+          >
+            🚀 Mint Your Developer Profile
+          </button>
+        </div>
+      </div>
     );
 
   return (

@@ -46,8 +46,8 @@ export default function ProjectTab({
         arguments: [
           tx.object(profileId),
           tx.pure.string(form.name),
-          tx.pure.string(form.desc),
           tx.pure.string(form.link || ""),
+          tx.pure.string(form.desc),
           tx.pure.vector("string", tagsArray),
           tx.object("0x6"), // Clock
         ],
