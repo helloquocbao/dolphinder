@@ -320,7 +320,7 @@ const MyProfile = () => {
               type="text"
               value={form.github}
               onChange={e => setForm({ ...form, github: e.target.value })}
-              placeholder="@GitHub"
+              placeholder="GitHub link"
               className="mt-px w-full border border-white/20 bg-white/10 px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
             />
             <input
@@ -336,7 +336,11 @@ const MyProfile = () => {
               disabled={loading}
               className="mt-6 w-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 font-semibold text-white shadow-md transition-all hover:scale-105 disabled:opacity-50"
             >
-              {loading ? "⏳ Saving..." : "💾 Save Info"}
+              {loading
+                ? "⏳ Saving..."
+                : profileId
+                  ? "💾 Update Profile"
+                  : "Mint Profile"}
             </button>
           </div>
 

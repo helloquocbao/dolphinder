@@ -159,11 +159,7 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
                   )}
                   {form.github && (
                     <a
-                      href={
-                        form.github.startsWith("http")
-                          ? form.github
-                          : `https://github.com/${form.github}`
-                      }
+                      href={`${form.github}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 transition-colors hover:text-cyan-300"

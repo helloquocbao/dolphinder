@@ -185,10 +185,20 @@ export default function CertificateTab({
           />
           <button
             onClick={mintCert}
-            disabled={loading}
-            className="w-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 font-semibold text-white shadow-md transition-all hover:scale-105 disabled:opacity-50"
+            disabled={loading || !profileId}
+            className={`w-full rounded-full px-5 py-2 font-semibold text-white shadow-md transition-all ${
+              !profileId
+                ? "cursor-not-allowed bg-gray-500/60 opacity-70"
+                : loading
+                  ? "bg-gradient-to-r from-cyan-400 to-blue-400 opacity-80"
+                  : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:scale-105"
+            }`}
           >
-            {loading ? "⏳ Minting..." : "🏅 Mint Certificate"}
+            {!profileId
+              ? "🔒 Mint Profile to Unlock Certificates"
+              : loading
+                ? "⏳ Minting..."
+                : "🏅 Mint Certificate"}
           </button>
         </div>
       </div>
