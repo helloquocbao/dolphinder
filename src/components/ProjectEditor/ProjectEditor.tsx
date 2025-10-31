@@ -8,6 +8,7 @@ import {
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID } from "@/lib/constant";
 import { GlobalSuiProvider } from "../providers/GlobalSuiProvider";
+import Silk from "../react-bits/Silk";
 
 interface ProjectEditorWrapProps {
   projectId: string;
@@ -49,6 +50,7 @@ const ProjectEditor = ({
     tags: "",
   });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!projectId) return;
@@ -59,7 +61,6 @@ const ProjectEditor = ({
   async function loadProject() {
     try {
       setLoading(true);
-
       const res = await client.getObject({
         id: projectId,
         options: { showContent: true },
@@ -91,13 +92,15 @@ const ProjectEditor = ({
     }
 
     try {
+      setSaving(true);
+
       const tx = new Transaction();
 
       tx.moveCall({
         target: `${PACKAGE_ID}::profiles::update_project`,
         arguments: [
-          tx.object(profileId), // NFT Profile
-          tx.pure.u64(projectIndex), // index (vẫn cần cho hàm Move)
+          tx.object(profileId),
+          tx.pure.u64(projectIndex),
           tx.pure.string(form.name),
           tx.pure.string(form.link_demo),
           tx.pure.string(form.description),
@@ -122,45 +125,94 @@ const ProjectEditor = ({
     } catch (e: any) {
       console.error("❌ Update error:", e);
       alert("Lỗi cập nhật: " + e.message);
+    } finally {
+      setSaving(false);
     }
   }
 
-  if (loading) return <div>Đang tải dữ liệu...</div>;
+  if (loading)
+    return (
+      <div className="animate-pulse text-center text-gray-400">
+        Đang tải dữ liệu dự án...
+      </div>
+    );
 
   return (
-    <div className="space-y-3">
-      <input
-        className="w-full rounded border p-2"
-        placeholder="Tên dự án"
-        value={form.name}
-        onChange={e => setForm({ ...form, name: e.target.value })}
-      />
-      <textarea
-        className="w-full rounded border p-2"
-        placeholder="Mô tả"
-        rows={3}
-        value={form.description}
-        onChange={e => setForm({ ...form, description: e.target.value })}
-      />
-      <input
-        className="w-full rounded border p-2"
-        placeholder="Link demo"
-        value={form.link_demo}
-        onChange={e => setForm({ ...form, link_demo: e.target.value })}
-      />
-      <input
-        className="w-full rounded border p-2"
-        placeholder="Tags, cách nhau bởi dấu phẩy"
-        value={form.tags}
-        onChange={e => setForm({ ...form, tags: e.target.value })}
-      />
-      <button
-        onClick={handleUpdate}
-        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-      >
-        💾 Cập nhật dự án
-      </button>
-    </div>
+    <>
+      <div className="fixed inset-0 -z-10">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#0a0f1c"
+          noiseIntensity={1.2}
+          rotation={0}
+        />
+      </div>
+      <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-8 text-white shadow-2xl backdrop-blur-md">
+        <h2 className="mb-6 text-center text-2xl font-semibold text-cyan-300">
+          ✏️ Edit Project
+        </h2>
+
+        <div className="space-y-5">
+          <div>
+            <label className="mb-1 block text-sm text-gray-300">
+              Tên dự án
+            </label>
+            <input
+              className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-400 transition outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40"
+              placeholder="Nhập tên dự án"
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm text-gray-300">Mô tả</label>
+            <textarea
+              className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-400 transition outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40"
+              placeholder="Mô tả ngắn gọn về dự án..."
+              rows={3}
+              value={form.description}
+              onChange={e => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm text-gray-300">
+              Link demo
+            </label>
+            <input
+              className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-400 transition outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40"
+              placeholder="https://your-demo-link.com"
+              value={form.link_demo}
+              onChange={e => setForm({ ...form, link_demo: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm text-gray-300">
+              Tags (cách nhau bằng dấu phẩy)
+            </label>
+            <input
+              className="w-full rounded-lg border border-white/10 bg-white/5 p-3 text-white placeholder-gray-400 transition outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/40"
+              placeholder="Ví dụ: web3, sui, nft"
+              value={form.tags}
+              onChange={e => setForm({ ...form, tags: e.target.value })}
+            />
+          </div>
+
+          <div className="pt-4 text-center">
+            <button
+              onClick={handleUpdate}
+              disabled={saving}
+              className="rounded-lg bg-gradient-to-r from-cyan-500/90 to-blue-500/90 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-cyan-400 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "⏳ Đang cập nhật..." : "💾 Lưu thay đổi"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

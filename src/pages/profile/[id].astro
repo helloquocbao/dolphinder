@@ -7,6 +7,5 @@ const { id = "" } = Astro.params;
 ---
 
 <MainLayout title="Community">
-  <h1 class="mb-4 text-2xl font-semibold text-blue-400">✏️ Chỉnh sửa dự án</h1>
   <ProfileInfoWrap client:load profileId={id} />
 </MainLayout>

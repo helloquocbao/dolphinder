@@ -15,7 +15,7 @@ export default function ProjectTab({
 
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
-  const [form, setForm] = useState({ name: "", desc: "", link: "" });
+  const [form, setForm] = useState({ name: "", desc: "", link: "", tags: "" });
 
   // 🧭 Load Project List
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function ProjectTab({
 
   async function fetchProjects() {
     const list = await getProfileProjects(profileId!);
-
+    console.log(list);
     setProjects(list || []);
   }
 
@@ -32,17 +32,24 @@ export default function ProjectTab({
   async function mintProject() {
     if (!profileId) return alert("⚠️ Please mint your profile first!");
     if (!form.name.trim()) return alert("⚠️ Enter project name!");
-
+    const tagsArray = form.tags
+      ? form.tags
+          .split(",")
+          .map(tag => tag.trim())
+          .filter(Boolean)
+      : [];
     try {
       setLoading(true);
       const tx = new Transaction();
       tx.moveCall({
-        target: `${PACKAGE_ID}::profiles::mint_project`,
+        target: `${PACKAGE_ID}::profiles::add_project`,
         arguments: [
           tx.object(profileId),
           tx.pure.string(form.name),
           tx.pure.string(form.desc),
           tx.pure.string(form.link || ""),
+          tx.pure.vector("string", tagsArray),
+          tx.object("0x6"), // Clock
         ],
       });
 
@@ -90,6 +97,13 @@ export default function ProjectTab({
             onChange={e => setForm({ ...form, link: e.target.value })}
             className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder:text-white/50 focus:border-cyan-400 focus:outline-none"
           />
+          <input
+            type="tags"
+            placeholder="Tags (separate with commas, e.g. web3, NFT, DeFi)"
+            value={form.tags}
+            onChange={e => setForm({ ...form, tags: e.target.value })}
+            className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white placeholder:text-white/50 focus:border-cyan-400 focus:outline-none"
+          />
           <button
             onClick={mintProject}
             disabled={loading}
@@ -116,11 +130,13 @@ export default function ProjectTab({
               </p>
               {proj.link_demo && (
                 <a
-                  href={proj.link_demo}
+                  onClick={() =>
+                    (window.location.href = `/project/${proj.id?.id}?index=${proj.projectIndex}&profileId=${profileId}`)
+                  }
                   target="_blank"
                   className="mt-3 inline-flex items-center gap-2 text-sm text-blue-300 hover:text-blue-200"
                 >
-                  🔗 View Demo
+                  🔗 View Edit
                 </a>
               )}
             </div>

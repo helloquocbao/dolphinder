@@ -208,9 +208,10 @@ export async function getProfileProjects(
         });
 
         const fields = (obj.data?.content as any)?.fields;
-
+        console.log("Project fields:", fields);
         return {
           id: fields.id,
+          projectIndex: fields?.name?.fields?.index,
           name: fields?.value?.fields?.name,
           description: fields?.value?.fields?.description,
           link_demo: fields?.value?.fields?.link_demo,
@@ -263,5 +264,38 @@ export async function getProfileCertificates(
   } catch (e) {
     console.error("❌ getProfileCertificates error:", e);
     return [];
+  }
+}
+
+export async function getProfileMinter(
+  profileId: string,
+  network: Network = "testnet"
+): Promise<string | null> {
+  const client = new SuiClient({ url: getFullnodeUrl(network) });
+  try {
+    const eventType = `${PACKAGE_ID}::profiles::ProfileCreated`;
+
+    // 🔍 Query tất cả event ProfileCreated
+    const result = await client.queryEvents({
+      query: { MoveEventType: eventType },
+      limit: 1000, // tăng nếu bạn có nhiều profile
+      order: "descending",
+    });
+
+    // 🔎 Tìm event khớp với profile_id
+    const matched = result.data.find(
+      (e: any) => e.parsedJson?.profile_id === profileId
+    );
+
+    if (!matched) {
+      console.warn(`⚠️ Không tìm thấy event cho profile_id = ${profileId}`);
+      return null;
+    }
+
+    // ✅ Trả về address đã mint (owner)
+    return matched.parsedJson?.owner || null;
+  } catch (err) {
+    console.error("❌ Lỗi khi truy vấn minter:", err);
+    return null;
   }
 }

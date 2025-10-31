@@ -35,7 +35,7 @@ export const BigPeekCarousel = ({ profiles }: any) => {
             key={item.profileId}
             className="flex justify-center transition-all duration-300"
           >
-            <div className="relative flex h-[320px] w-[280px] items-center justify-center transition-transform duration-300 ease-out hover:scale-105">
+            <div className="relative flex h-[370px] w-[280px] items-center justify-center transition-transform duration-300 ease-out hover:scale-105">
               <ProfileCard
                 profile={{
                   projectCount: item.projectCount,

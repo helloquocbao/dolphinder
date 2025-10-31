@@ -5,20 +5,16 @@ import ConnectBtn from "../common/ConnectBtn";
 
 const navItems = [
   {
-    label: "Learn",
-    href: "/learn",
-  },
-  {
     label: "Developers",
     href: "/developers",
   },
   {
-    label: "Community",
-    href: "/community",
+    label: "Projects",
+    href: "/projects",
   },
   {
-    label: "Showcase",
-    href: "/showcase",
+    label: "My NFT",
+    href: "/my-profile",
   },
 ];
 

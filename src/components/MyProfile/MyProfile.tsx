@@ -373,7 +373,7 @@ const MyProfile = () => {
               ) : (
                 <CertificateTab
                   profileId={profileId}
-                  accountAdress={account?.address}
+                  accountAdress={account?.address ?? ""}
                 />
               )}
             </div>

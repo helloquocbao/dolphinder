@@ -33,7 +33,7 @@ export default function CertificateTab({
 
   async function fetchCerts() {
     const list = await getProfileCertificates(profileId!, accountAdress!);
-    console.log("📜 Certificates:", list);
+
     setCerts(list || []);
   }
 
@@ -204,10 +204,7 @@ export default function CertificateTab({
               {/* Ảnh banner certificate */}
               <div className="h-40 w-full overflow-hidden">
                 <img
-                  src={
-                    cert.certificate_url ||
-                    "https://via.placeholder.com/400x200?text=Certificate"
-                  }
+                  src={cert.certificate_url}
                   alt={cert.title || "certificate"}
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />

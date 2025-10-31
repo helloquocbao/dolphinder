@@ -1,9 +1,8 @@
 ---
+import { ListProjectWrap } from "@/components/ListProject/ListProject";
 import MainLayout from "@/layouts/MainLayout.astro";
 ---
 
 <MainLayout title="Community">
-  <div class="container mx-auto mt-16 px-4 py-4">
-    <h1>Community</h1>
-  </div>
+  <ListProjectWrap client:load />
 </MainLayout>
