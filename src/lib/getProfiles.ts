@@ -122,6 +122,7 @@ export async function getAllProfilesWithDetails(
         profileId,
         owner: details.owner,
         name: details.name,
+        bio: details.bio,
         createdAt: parseInt(event.timestampMs || "0"),
         projectCount: parseInt(details?.project_count || "0"),
         certificateCount: parseInt(details?.certificate_count || "0"),

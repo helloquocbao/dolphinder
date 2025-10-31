@@ -72,7 +72,7 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
         <Silk
           speed={5}
           scale={1}
-          color="#4DA2FF"
+          color="#13244D"
           noiseIntensity={1.5}
           rotation={0}
         />

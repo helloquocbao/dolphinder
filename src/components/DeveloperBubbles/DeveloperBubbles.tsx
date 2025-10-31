@@ -48,7 +48,7 @@ export const DeveloperBubble: FC = () => {
         <Silk
           speed={5}
           scale={1}
-          color="#4DA2FF"
+          color="#13244D"
           noiseIntensity={1.5}
           rotation={0}
         />
@@ -91,7 +91,7 @@ export const DeveloperBubble: FC = () => {
         {/* 👣 Footer CTA */}
         <div className="mt-12 mb-6 text-sm text-white/60">
           Built with 💙 by{" "}
-          <span className="font-semibold text-blue-400">Dolphinder Labs</span>
+          <span className="font-semibold text-blue-400">Dolphinder</span>
         </div>
       </div>
 

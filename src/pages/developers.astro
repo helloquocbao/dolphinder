@@ -1,59 +1,8 @@
 ---
+import { DevelopersWrap } from "@/components/develops/Develops";
 import MainLayout from "@/layouts/MainLayout.astro";
-
-import { Github, Linkedin, Globe, ExternalLink } from "@lucide/astro";
-
-const developers = await loadDevelopers();
 ---
 
 <MainLayout title="Developers - Dolphinder">
-  <div class="min-h-screen pt-16">
-    <div class="container mx-auto px-4 py-8">
-      <!-- Header -->
-      <div class="mb-12 text-center">
-        <h1 class="mb-4 text-4xl font-bold md:text-5xl">
-          Welcome to Dolphinder Nation
-        </h1>
-        <p class="mb-2 text-xl text-white/80">
-          The on-chain developer directory & showcases
-        </p>
-        <p class="text-white/60">
-          {developers.length} talented developers and counting...
-        </p>
-      </div>
-
-      <!-- Developer Grid -->
-      <div
-        class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-      >
-        abc
-      </div>
-
-      <!-- Call to Action -->
-      <!-- <div class="text-center mt-16">
-        <div class="inline-block bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl p-8 border border-white/10">
-          <h3 class="text-2xl font-bold mb-4">Want to join our community?</h3>
-          <p class="text-white/70 mb-6">
-            Connect with amazing developers building the future of Web3
-          </p>
-          <a 
-            href="/community" 
-            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105"
-          >
-            Join Community
-            <ExternalLink class="w-4 h-4 ml-2" />
-          </a>
-        </div>
-      </div> -->
-    </div>
-  </div>
+  <DevelopersWrap client:load />
 </MainLayout>
-
-<style>
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-</style>
