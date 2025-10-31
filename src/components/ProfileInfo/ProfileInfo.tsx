@@ -17,14 +17,6 @@ const ProfileInfoWrap: FC<ProjectEditorWrapProps> = ({ profileId }) => (
   </GlobalSuiProvider>
 );
 
-interface Certificate {
-  id: string;
-  title: string;
-  description: string;
-  issue_date: string;
-  certificate_url?: string;
-}
-
 const ProfileInfo = ({ profileId }: { profileId: string }) => {
   const client = useSuiClient();
 
