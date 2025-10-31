@@ -4,6 +4,7 @@
 
 import { SuiClient, getFullnodeUrl } from "@mysten/sui/client";
 import type { SuiEvent } from "@mysten/sui/client";
+import { PACKAGE_ID } from "./constant";
 
 type Network = "mainnet" | "testnet" | "devnet" | "localnet";
 
@@ -184,8 +185,12 @@ export async function getProfileDetails(
   return null;
 }
 
-export async function getProfileProjects(client: SuiClient, profileId: string) {
+export async function getProfileProjects(
+  profileId: string,
+  network: Network = "testnet"
+) {
   try {
+    const client = new SuiClient({ url: getFullnodeUrl(network) });
     // 1️⃣ Lấy danh sách dynamic fields trong object profile
     const fields = await client.getDynamicFields({ parentId: profileId });
 
@@ -218,6 +223,45 @@ export async function getProfileProjects(client: SuiClient, profileId: string) {
     return projects;
   } catch (err) {
     console.error("❌ Error fetching projects:", err);
+    return [];
+  }
+}
+
+/**
+ * 🎓 Lấy danh sách certificates của 1 profile NFT
+ */
+export async function getProfileCertificates(
+  profileId: string,
+  accountAdress: string,
+  network: Network = "testnet"
+) {
+  const client = new SuiClient({ url: getFullnodeUrl(network) });
+  try {
+    const type = `${PACKAGE_ID}::profiles::CertificateNFT`;
+
+    // Lấy tất cả certificate NFT mà user sở hữu
+    const res = await client.getOwnedObjects({
+      owner: accountAdress /* address của người dùng */,
+      filter: { StructType: type },
+      options: { showContent: true },
+    });
+
+    // Lọc theo certificate.profile_id == profileId
+    const certs = res.data
+      .map(obj => obj.data?.content?.fields)
+      .filter(f => f?.profile_id === profileId)
+      .map(f => ({
+        title: f.title,
+        issuer: f.issuer,
+        issue_date: f.issue_date,
+        certificate_url: f.certificate_url,
+        description: f.description,
+        credential_id: f.credential_id,
+      }));
+
+    return certs;
+  } catch (e) {
+    console.error("❌ getProfileCertificates error:", e);
     return [];
   }
 }

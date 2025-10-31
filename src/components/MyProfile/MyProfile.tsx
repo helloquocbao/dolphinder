@@ -10,6 +10,8 @@ import { GlobalSuiProvider } from "../providers/GlobalSuiProvider";
 import Silk from "../react-bits/Silk";
 import { PACKAGE_ID, REGISTRY_ID } from "@/lib/constant";
 import { getProfileProjects } from "@/lib/getProfiles";
+import ProjectTab from "./ProjectTab";
+import CertificateTab from "./CertificateTab";
 
 const MyProfileWrap = () => (
   <GlobalSuiProvider>
@@ -22,6 +24,8 @@ const MyProfile = () => {
   const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
   const account = useCurrentAccount();
 
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [activeTab, setActiveTab] = useState<"projects" | "certs">("projects");
   const [loading, setLoading] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
@@ -35,9 +39,6 @@ const MyProfile = () => {
     github: "",
     yoursite: "",
   });
-
-  const [projects, setProjects] = useState<any[]>([]);
-  const [certs, setCerts] = useState<any[]>([]);
 
   useEffect(() => {
     if (account?.address) fetchProfile();
@@ -78,7 +79,6 @@ const MyProfile = () => {
           github: f.social_links?.[1] || "",
           yoursite: f.social_links?.[2] || "",
         });
-        getListProfiles(client, obj.objectId);
       }
     } catch (e) {
       console.error("Error loading profile:", e);
@@ -87,43 +87,112 @@ const MyProfile = () => {
     }
   }
 
-  const getListProfiles = async (client: any, profileId: string) => {
-    const listProject = await getProfileProjects(client, profileId);
-
-    setProjects(listProject);
-  };
-
+  // === Mint or update ===
   async function handleSubmit() {
-    if (!account?.address) return alert("⚠️ Connect your wallet first");
-    if (!form.name.trim()) return alert("⚠️ Please enter your name");
+    if (!account?.address) {
+      alert("⚠️ Please connect your wallet before proceeding.");
+      return;
+    }
+
+    if (!form.name.trim()) {
+      alert("⚠️ Please enter your display name.");
+      return;
+    }
+
+    const hasAnyLink = [form.email, form.github, form.yoursite].some(Boolean);
+    if (!hasAnyLink) {
+      alert("⚠️ Please enter at least one link (Email, GitHub, or Website).");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      setLoading(true);
+      let avatarUrl = form.avatar_url;
+      let bannerUrl = form.banner_url;
+
+      // Nếu user chọn file mới → upload trước
+      if (avatarFile) avatarUrl = await uploadToWalrus(avatarFile);
+      if (bannerFile) bannerUrl = await uploadToWalrus(bannerFile);
+
       const tx = new Transaction();
-      const links = [form.email, form.github, form.yoursite].filter(Boolean);
-      tx.moveCall({
-        target: `${PACKAGE_ID}::profiles::update_profile`,
-        arguments: [
-          tx.object(profileId!),
-          tx.pure.string(form.name),
-          tx.pure.string(form.bio),
-          tx.pure.string(form.avatar_url),
-          tx.pure.string(form.banner_url),
-          tx.pure.vector("string", links),
-        ],
-      });
+      const links = [form?.email, form?.github, form?.yoursite].filter(Boolean);
+
+      if (profileId) {
+        // === Update profile ===
+        tx.moveCall({
+          target: `${PACKAGE_ID}::profiles::update_profile`,
+          arguments: [
+            tx.object(profileId),
+            tx.pure.string(form.name),
+            tx.pure.string(form.bio),
+            tx.pure.string(avatarUrl),
+            tx.pure.string(bannerUrl),
+            tx.pure.vector("string", links),
+          ],
+        });
+      } else {
+        // === Mint new profile ===
+        tx.moveCall({
+          target: `${PACKAGE_ID}::profiles::mint_profile`,
+          arguments: [
+            tx.object(REGISTRY_ID),
+            tx.pure.string(form.name),
+            tx.pure.string(form.bio),
+            tx.pure.string(avatarUrl),
+            tx.pure.string(bannerUrl),
+            tx.pure.vector("string", links),
+            tx.object("0x6"), // Clock
+          ],
+        });
+      }
+
       const result = await signAndExecute({
         transaction: tx,
         chain: "sui:testnet",
       });
-      await client.waitForTransaction({ digest: result.digest });
-      alert("✅ Profile updated!");
+      await client.waitForTransaction({
+        digest: result.digest,
+        options: { showEffects: true },
+      });
+
+      alert(profileId ? "✅ Cập nhật thành công!" : "✅ Mint thành công!");
+      setAvatarFile(null);
+      setBannerFile(null);
       fetchProfile();
-    } catch (e: any) {
-      alert("❌ Error: " + e.message);
+    } catch (err: any) {
+      console.error("Error:", err);
+      alert("❌ Lỗi: " + err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function previewImage(file: File, field: "avatar_url" | "banner_url") {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm(prev => ({ ...prev, [field]: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // === Upload file to Walrus and return aggregator URL ===
+  async function uploadToWalrus(file: File) {
+    const imageBlob = new Blob([await file.arrayBuffer()], {
+      type: file.type,
+    });
+
+    const res = await fetch(
+      "https://publisher.walrus-testnet.walrus.space/v1/blobs",
+      { method: "PUT", body: imageBlob }
+    );
+    if (!res.ok) throw new Error("Upload thất bại lên Walrus Publisher");
+
+    const json = await res.json();
+    const blobId = json?.newlyCreated?.blobObject?.blobId;
+    if (!blobId) throw new Error("Không tìm thấy blobId trong phản hồi");
+
+    return `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${blobId}`;
   }
 
   return (
@@ -140,12 +209,38 @@ const MyProfile = () => {
       </div>
 
       {/* 🖼 Banner */}
-      <div className="relative h-[14rem] w-full overflow-hidden">
+      <div className="relative h-[16rem] w-full">
         <img
           src={form.banner_url}
           alt="banner"
           className="h-full w-full object-cover brightness-90"
         />
+        <div className="font-display group hover:bg-accent absolute right-0 bottom-4 z-20 mr-1 flex items-center rounded-lg bg-[#e7e8ec] px-4 py-2 text-sm">
+          <input
+            type="file"
+            accept="image/*"
+            className="absolute inset-0 cursor-pointer opacity-0"
+            onChange={e => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setBannerFile(file);
+                previewImage(file, "banner_url");
+              }
+            }}
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            className="fill-jacarta-400 group-hover:fill- mr-1 h-4 w-4"
+          >
+            <path fill="none" d="M0 0h24v24H0z"></path>
+            <path d="M15.728 9.686l-1.414-1.414L5 17.586V19h1.414l9.314-9.314zm1.414-1.414l1.414-1.414-1.414-1.414-1.414 1.414 1.414 1.414zM7.242 21H3v-4.243L16.435 3.322a1 1 0 0 1 1.414 0l2.829 2.829a1 1 0 0 1 0 1.414L7.243 21z"></path>
+          </svg>
+          <span className="mt-0.5 block text-black">Edit cover photo</span>
+        </div>
+
         <div className="absolute inset-0 bg-gradient-to-t from-[#13244D]/95 via-[#13244D]/40 to-transparent" />
         <div className="absolute -bottom-16 left-1/2 z-20 -translate-x-1/2">
           <img
@@ -153,6 +248,32 @@ const MyProfile = () => {
             alt="avatar"
             className="h-28 w-28 rounded-full border-4 border-white/20 object-cover shadow-[0_0_20px_rgba(77,162,255,0.5)] ring-4 ring-cyan-400/60"
           />
+          <div className="group hover:bg-accent border-jacarta-100 absolute -right-3 -bottom-2 h-8 w-8 overflow-hidden rounded-full border bg-[#e7e8ec] text-center hover:border-transparent">
+            <input
+              type="file"
+              accept="image/*"
+              className="absolute top-0 left-0 w-full cursor-pointer opacity-0"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setAvatarFile(file);
+                  previewImage(file, "avatar_url");
+                }
+              }}
+            />
+            <div className="flex h-full items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                className="fill-jacarta-400 group-hover:fill- h-4 w-4"
+              >
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path d="M15.728 9.686l-1.414-1.414L5 17.586V19h1.414l9.314-9.314zm1.414-1.414l1.414-1.414-1.414-1.414-1.414 1.414 1.414 1.414zM7.242 21H3v-4.243L16.435 3.322a1 1 0 0 1 1.414 0l2.829 2.829a1 1 0 0 1 0 1.414L7.243 21z" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -248,61 +369,12 @@ const MyProfile = () => {
             {/* Tabs content */}
             <div className="mt-6 space-y-3">
               {activeTab === "projects" ? (
-                projects.length ? (
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    {projects.map((proj: any, i: number) => (
-                      <div
-                        key={i}
-                        className="group relative overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-white/5 to-white/0 p-5 shadow-md backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50 hover:shadow-cyan-500/30"
-                      >
-                        {/* Background glow */}
-                        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-tr from-cyan-400/20 via-blue-400/10 to-transparent opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100"></div>
-
-                        {/* Header */}
-                        <h4 className="relative z-10 mb-1 text-lg font-semibold text-cyan-300 group-hover:text-cyan-200">
-                          {proj.name || "Untitled Project"}
-                        </h4>
-
-                        {/* Description */}
-                        <p className="relative z-10 line-clamp-3 text-sm text-white/70">
-                          {proj.description || "No description provided."}
-                        </p>
-
-                        {/* Footer */}
-                        {proj.link_demo && (
-                          <a
-                            href={proj.link_demo}
-                            target="_blank"
-                            className="relative z-10 mt-4 inline-flex items-center gap-2 text-sm font-medium text-blue-300 hover:text-blue-200"
-                          >
-                            🔗 <span>View Demo</span>
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-white/60">
-                    No projects found.
-                  </p>
-                )
-              ) : certs.length ? (
-                certs.map((cert: any, i: number) => (
-                  <div
-                    key={i}
-                    className="rounded-lg border border-white/10 bg-white/5 p-4 transition-all hover:bg-white/10"
-                  >
-                    <h4 className="font-semibold text-cyan-300">{cert.name}</h4>
-                    <p className="text-sm text-white/70">
-                      Issuer: {cert.issuer}
-                    </p>
-                    <p className="text-xs text-white/50">Date: {cert.date}</p>
-                  </div>
-                ))
+                <ProjectTab profileId={profileId} />
               ) : (
-                <p className="text-center text-white/60">
-                  No certificates found.
-                </p>
+                <CertificateTab
+                  profileId={profileId}
+                  accountAdress={account?.address}
+                />
               )}
             </div>
           </div>
