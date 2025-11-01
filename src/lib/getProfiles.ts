@@ -249,17 +249,21 @@ export async function getProfileCertificates(
 
     // Lọc theo certificate.profile_id == profileId
     const certs = res.data
-      .map(obj => obj.data?.content?.fields)
-      .filter(f => f?.profile_id === profileId)
-      .map(f => ({
-        title: f.title,
-        issuer: f.issuer,
-        issue_date: f.issue_date,
-        certificate_url: f.certificate_url,
-        description: f.description,
-        credential_id: f.credential_id,
-      }));
-
+      .map(obj => {
+        const fields = obj.data?.content?.fields;
+        if (!fields) return null;
+        return {
+          object_id: obj.data.objectId, // 👈 lấy objectId ở đây
+          title: fields.title,
+          issuer: fields.issuer,
+          issue_date: fields.issue_date,
+          certificate_url: fields.certificate_url,
+          description: fields.description,
+          credential_id: fields.credential_id,
+          profile_id: fields.profile_id,
+        };
+      })
+      .filter(f => f && f.profile_id === profileId);
     return certs;
   } catch (e) {
     console.error("❌ getProfileCertificates error:", e);

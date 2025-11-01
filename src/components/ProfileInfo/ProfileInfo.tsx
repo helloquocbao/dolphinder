@@ -120,6 +120,7 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
     try {
       const accountAddress = await getProfileMinter(profileId);
       const list = await getProfileCertificates(profileId!, accountAddress!);
+      console.log("🎓 Fetched certificates:", list);
       setCertificates(list);
     } catch (err) {
       console.error("❌ Failed to fetch certificates:", err);
@@ -254,9 +255,14 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
 
                 <div className="mt-4 text-sm text-gray-400">
                   NFT ID:{" "}
-                  <span className="font-mono break-all text-gray-300">
+                  <a
+                    href={`https://suiscan.xyz/testnet/object/${profileId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono break-all text-gray-300 underline hover:text-blue-400"
+                  >
                     {profileId}
-                  </span>
+                  </a>
                 </div>
 
                 {/* 🌐 Links */}
@@ -367,6 +373,7 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {certificates.map(cert => {
+                console.log("🎓 Certificate:", cert);
                 return (
                   <div
                     key={cert.id}
@@ -395,17 +402,18 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
                     <p className="mt-3 text-xs text-gray-500">
                       Issued: {cert.issue_date}
                     </p>
-
+                    {/* 🌐 View on-chain */}
                     {cert.certificate_url && (
                       <a
-                        href={cert.certificate_url}
+                        href={`https://suiscan.xyz/testnet/object/${cert.object_id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="mt-4 inline-block text-sm text-cyan-300 transition-colors hover:text-cyan-200"
                       >
-                        🔗 View Certificate
+                        🔗View on-chain
                       </a>
                     )}
+                    <br />
                   </div>
                 );
               })}

@@ -46,9 +46,11 @@ const ProfileProjects = ({ profileId }: ProfileProjectsProps) => {
               name: key.name,
             });
 
+            console.log("📦 Project Object:", projectObj);
             const data = (projectObj.data?.content as any)?.fields.value;
 
             return {
+              objectId: projectObj?.data?.objectId,
               id: projectObj?.data?.objectId,
               name: data?.fields.name,
               link_demo: data?.fields.link_demo,
