@@ -1,12 +1,23 @@
 "use client";
 
 import { useEffect, useState, type FC } from "react";
-import { useSuiClient } from "@mysten/dapp-kit";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+  useSuiClient,
+} from "@mysten/dapp-kit";
 import Silk from "../react-bits/Silk";
 import { GlobalSuiProvider } from "../providers/GlobalSuiProvider";
 import ProfileProjects from "./ProfileProjects";
 import { getProfileCertificates, getProfileMinter } from "@/lib/getProfiles";
-
+import {
+  ADMIN_ADDRESS,
+  ADMIN_CAP,
+  PACKAGE_ID,
+  REGISTRY_ID,
+  REGISTRY_VERIFY_ID,
+} from "@/lib/constant";
+import { Transaction } from "@mysten/sui/transactions";
 interface ProjectEditorWrapProps {
   profileId: string;
 }
@@ -19,8 +30,10 @@ const ProfileInfoWrap: FC<ProjectEditorWrapProps> = ({ profileId }) => (
 
 const ProfileInfo = ({ profileId }: { profileId: string }) => {
   const client = useSuiClient();
-
+  const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
+  const account = useCurrentAccount();
   const [loading, setLoading] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   const [form, setForm] = useState({
     name: "",
     bio: "",
@@ -31,13 +44,42 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
     yoursite: "",
     projectCount: 0,
     certificateCount: 0,
+    verified: false,
   });
   const [certificates, setCertificates] = useState<any[]>([]);
+  const [voterProfile, setVoterProfile] = useState<string>("");
 
+  useEffect(() => {
+    if (account?.address) {
+      fetchProfile().then(setVoterProfile);
+    }
+  }, [account?.address]);
   useEffect(() => {
     if (profileId) {
       fetchProfileDetail(profileId);
       fetchCertificates(profileId);
+    }
+  }, [profileId]);
+
+  async function isProfileVerified() {
+    // 1️⃣ Lấy VerifyRegistry object từ chain
+    const res = await client.getObject({
+      id: REGISTRY_VERIFY_ID,
+      options: { showContent: true },
+    });
+
+    // 2️⃣ Lấy trường verified_list
+    const verifiedList =
+      res.data?.content?.fields?.verified_list?.map(addr =>
+        addr.toLowerCase()
+      ) || [];
+    console.log("✅ Verified list:", verifiedList);
+    // 3️⃣ So sánh profile hiện tại
+    return verifiedList.includes(profileId.toLowerCase());
+  }
+  useEffect(() => {
+    if (profileId && REGISTRY_VERIFY_ID) {
+      isProfileVerified().then(setIsVerified);
     }
   }, [profileId]);
 
@@ -64,6 +106,7 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
         yoursite: links[2] || "",
         projectCount: parseInt(fields.project_count || "0"),
         certificateCount: parseInt(fields.certificate_count || "0"),
+        verified: fields.verified || false,
       });
     } catch (err) {
       console.error("❌ Failed to fetch profile detail:", err);
@@ -82,6 +125,85 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
       console.error("❌ Failed to fetch certificates:", err);
     }
   }
+
+  const handleAdminVerify = async () => {
+    try {
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${PACKAGE_ID}::profiles::verify_profile_admin`,
+        arguments: [
+          tx.object(ADMIN_CAP), // quyền admin
+          tx.object(REGISTRY_VERIFY_ID),
+          tx.object(profileId), // address của NFT user
+          tx.object("0x6"), // Clock
+        ],
+      });
+
+      const result = await signAndExecute({
+        transaction: tx,
+        chain: "sui:testnet",
+      });
+      await client.waitForTransaction({
+        digest: result.digest,
+        options: { showEffects: true },
+      });
+      alert("✅ Profile verified by admin!");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Verify failed!");
+    }
+  };
+  async function fetchProfile() {
+    setLoading(true);
+    try {
+      const type = `${PACKAGE_ID}::profiles::ProfileNFT`;
+      const objects = await client.getOwnedObjects({
+        owner: account!.address,
+        filter: { StructType: type },
+        options: { showContent: true },
+      });
+
+      console.log(objects);
+
+      if (objects.data.length !== 0) {
+        const obj = objects.data[0].data!;
+        const f = obj.content.fields as any;
+        console.log("🗳 Voter Profile NFT:", obj);
+        return obj.objectId;
+      }
+    } catch (e) {
+      console.error("Error loading profile:", e);
+      return null;
+    }
+  }
+
+  const handleCommunityVote = async () => {
+    try {
+      console.log("🗳 Voter profile:", voterProfile);
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${PACKAGE_ID}::profiles::vote_verify`,
+        arguments: [
+          tx.object(REGISTRY_VERIFY_ID),
+          tx.object(profileId), // address NFT người được vote
+          tx.object(voterProfile), // object NFT của voter
+          tx.object("0x6"), // Clock
+        ],
+      });
+      const result = await signAndExecute({
+        transaction: tx,
+        chain: "sui:testnet",
+      });
+      await client.waitForTransaction({
+        digest: result.digest,
+        options: { showEffects: true },
+      });
+      alert("✅ Voted successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Vote failed! " + err.message);
+    }
+  };
 
   return (
     <>
@@ -188,6 +310,38 @@ const ProfileInfo = ({ profileId }: { profileId: string }) => {
                       {form.certificateCount}
                     </p>
                     <p className="text-sm text-gray-400">Certificates</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    {isVerified ? (
+                      // ✅ Đã verified
+                      <div className="rounded-full bg-green-900/40 px-3 py-1 text-sm font-semibold text-green-300 shadow">
+                        ✅ Verified
+                      </div>
+                    ) : (
+                      <>
+                        {/* 🛡 Nếu là admin */}
+                        {account?.address === ADMIN_ADDRESS ? (
+                          <button
+                            onClick={handleAdminVerify}
+                            className="rounded-md bg-yellow-500/20 px-3 py-1 text-sm font-semibold text-yellow-400 transition hover:bg-yellow-500/30"
+                          >
+                            🛡 Admin Verify
+                          </button>
+                        ) : !form.verified ? (
+                          // 👥 Nếu là cộng đồng đã verified
+                          <button
+                            onClick={handleCommunityVote}
+                            className="rounded-md bg-cyan-500/20 px-3 py-1 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/30"
+                          >
+                            👥 Vote to Verify
+                          </button>
+                        ) : (
+                          // ⚠️ Không đủ điều kiện
+                          <p className="text-sm text-gray-500">Unverified</p>
+                        )}
+                      </>
+                    )}
+                    <p className="mt-1 text-sm text-gray-400">Status</p>
                   </div>
                 </div>
               </>

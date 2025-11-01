@@ -60,7 +60,7 @@ export default function ProjectTab({
       await client.waitForTransaction({ digest: result.digest });
 
       alert("✅ Project minted successfully!");
-      setForm({ name: "", desc: "", link: "" });
+      setForm({ name: "", desc: "", link: "", tags: "" });
       fetchProjects();
     } catch (e: any) {
       alert("❌ Error: " + e.message);
